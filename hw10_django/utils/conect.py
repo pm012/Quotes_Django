@@ -1,5 +1,5 @@
 import configparser
-from mongoengine import connect
+from pymongo import MongoClient
 import os
 
 conf_file_path = os.path.abspath('./hw10_django/utils/conf.ini')
@@ -12,5 +12,13 @@ domain = config.get('DB', 'DOMAIN')
 
 
 def get_mongo_connection():
-    connection_uri = f"mongodb+srv://{mongo_user}:{mongo_pass}@{domain}/{db_name}?retryWrites=true&w=majority&appName=Cluster0"
-    return connect(host=connection_uri, ssl=True)
+    # Construct the MongoDB connection URI
+    connection_uri = f"mongodb+srv://{mongo_user}:{mongo_pass}@{domain}/{db_name}?retryWrites=true&w=majority"
+    
+    # Connect to the MongoDB cluster
+    client = MongoClient(connection_uri)
+    
+    # Select the database
+    db = client[db_name]
+    
+    return db
