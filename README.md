@@ -1,4 +1,8 @@
-# HW10Django
+# Home Work 10 Django
+Instructions:
+1. Run Postgre database docker-compose up -d
+2. Migration command: "python -m hw10_django.utils.migration"
+
 Task description
 It should be created similar site to http://quotes.toscrape.com . 
 You need to implement this using Django.
