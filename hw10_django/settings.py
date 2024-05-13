@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-a6m1mfw8jkxcra+6z-3dk_^5lfoysvu+%8jpxlytb)y&la987y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'users',
 
     # Django apps
+    'django.contrib.postgres',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -78,24 +79,15 @@ WSGI_APPLICATION = 'hw10_django.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-     'default': {
-          'ENGINE': 'django.db.backends.sqlite3',
-          'NAME': BASE_DIR / 'db.sqlite3',
-        # 'ENGINE': 'djongo',
-        #     'NAME': 'your-db-name',
-        #     'ENFORCE_SCHEMA': False,
-        #     'CLIENT': {
-        #         'host': 'mongodb+srv://<username>:<password>@<atlas cluster>/<myFirstDatabase>?retryWrites=true&w=majority'
-        #     }
-        
-     },
-      "users": {
-        "NAME": "app_data",
-        "ENGINE": "django.db.backends.postgresql",
-        "USER": "postgres_user",
-        "PASSWORD": "s3krit",
-    },
+DATABASES = {    
+        'default': {
+        'ENGINE': 'django.db.backends.postgresql',  
+        'NAME': 'hw10django', 
+        'USER': 'admin', 
+        'PASSWORD': 'secret01', 
+        'HOST': 'localhost', 
+        'PORT': '5432',  
+    }
  }
 
 

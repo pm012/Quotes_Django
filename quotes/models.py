@@ -1,15 +1,24 @@
 from django.db import models
-from mongoengine import  Document, StringField, ListField, ReferenceField
+#from mongoengine import  Document, StringField, ListField, ReferenceField
 
 # Define MongoDB models
-class Author(Document):
-    fullname = StringField(required=True)
-    born_date = StringField()
-    born_location = StringField()
-    description = StringField()
+class Author(models.Model):
+    id = models.AutoField(primary_key=True)
+    fullname = models.CharField(max_length=50)
+    born_date = models.CharField(max_length=50)
+    born_location = models.CharField(max_length=150)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
-class Quote(Document):
-    tags = ListField(StringField())
-    author = ReferenceField(Author)
-    quote = StringField()
+class Tag(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=30, null=False, unique=True)
+
+
+class Quote(models.Model):
+    id = models.AutoField(primary_key=True)
+    tags = models.ManyToManyField(Tag)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, default=None, null=True)
+    quote = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
