@@ -4,7 +4,7 @@ Instructions:
 2. Migration command: "python -m hw10_django.utils.migration"
 
 Task description
-It should be created similar site to http://quotes.toscrape.com . 
+Create a site. The site should be created similar to http://quotes.toscrape.com . 
 You need to implement this using Django.
 
 1. Implement possibility to register on site and login to site.

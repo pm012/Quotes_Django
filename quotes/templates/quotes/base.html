@@ -23,11 +23,16 @@
             </div>
             <div class="col-md-4">
                 <p>
-
-                    <a href="/login" class="btn btn-primary">SignUp</a>
-                    <a href="/login" class="btn btn-primary">Login</a>
-                    <a href="/login" class="btn btn-primary">Logout</a>
-
+                    {% if not user.is_authenticated %}
+                    <a href="/users/signup" class="btn btn-primary">SignUp</a>
+                    <a href="/users/login" class="btn btn-primary">Login</a>
+                    {% else %}
+                    <a href="/add/author" class="btn btn-primary">Add author</a>
+                    <a href="/add/tag" class="btn btn-primary">Add tag</a>
+                    <a href="/add/quote" class="btn btn-primary">Add quote</a>
+                    <a href="/users/profile" class="btn btn-primary" title='Username: "{{ user }}"'>Profile</a>
+                    <a href="/users/logout" class="btn btn-primary" title='Username: "{{ user }}"'>Logout</a>
+                    {% endif %}
                 </p>
             </div>
         </div>
