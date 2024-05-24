@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 
 from .models import Quote, Author, Tag
 
-from .froms import AuthorForm, QuoteForm, TagForm
+from .forms import AuthorForm, QuoteForm, TagForm
 
 PER_PAGE = 10
 # Create your views here.
