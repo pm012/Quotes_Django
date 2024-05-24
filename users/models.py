@@ -21,3 +21,4 @@ class Profile(models.Model):
             new_img = (250, 250)
             img.thumbnail(new_img)
             img.save(self.avatar.path)
+

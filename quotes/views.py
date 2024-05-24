@@ -24,7 +24,7 @@ PER_PAGE = 10
 #     return render(request, 'quotes/index.html', context={'quotes': quotes_on_page})
 def main(request, page=1):
     quotes = Quote.objects.all()
-    paginator = Paginator(quotes, per_page=PER_PAGE)
+    paginator = Paginator(list(quotes), per_page=PER_PAGE)
 
     context = {"quotes": paginator.page(page)}
     return render(request, "quotes/index.html", context)

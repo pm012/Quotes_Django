@@ -31,8 +31,8 @@
                 {% else %}
                 <ul>
                     <li><a href="{% url 'quotes:add_author' %}" class="btn btn-primary">Add author</a></li>
-                    <li><a href="/add/tag" class="btn btn-primary">Add tag</a></li>
-                    <li><a href="/add/quote" class="btn btn-primary">Add quote</a></li>
+                    <li><a href="{% url 'quotes:add_tag' %}" class="btn btn-primary">Add tag</a></li>
+                    <li><a href="{% url 'quotes:add_quote' %}" class="btn btn-primary">Add quote</a></li>
                 </ul>
                 <ul>
                     <li>Welcome <b>{{ user.username }}!</b></li>
