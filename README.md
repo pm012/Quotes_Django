@@ -1,10 +1,11 @@
 # Home Work 10 Django
 
-Instructions:
+Instructions: 0. Navigate to project dir
 
 1. Run Postgre database docker-compose up -d
 2. Migration command: "python -m hw10_django.utils.migration"
-3. `python manage.py startapp quotes`
+3. launch the application `python manage.py runserver`
+4. Open http://localhost:8000
 
 Task description
 Create a site. The site should be created similar to http://quotes.toscrape.com .

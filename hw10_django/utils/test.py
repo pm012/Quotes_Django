@@ -1,12 +1,17 @@
-import configparser
 import os
-conf_file_path = os.path.abspath('./hw10_django/utils/conf.ini')
+import django
+from django.db.models import Count
 
 
-config = configparser.ConfigParser()
-config.read('./hw10_django/utils/conf.ini')
-print(config.sections())
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hw10_django.settings")
+django.setup()
 
-with open(conf_file_path ,'r') as file:
-    x = file.read()
-    print(x)
+from quotes.models import Quote, Tag, Author
+
+
+
+if __name__ =="__main__":
+     top_tags = Tag.objects.annotate(num_quotes=Count('quote')).order_by('-num_quotes')[:10]
+     for tag in top_tags:
+          print(f"name: {tag.name} count: {id}")
+

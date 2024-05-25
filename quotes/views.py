@@ -5,7 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.contrib import messages
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
+from django.db.models import Count
 
 from .models import Quote, Author, Tag
 
@@ -25,10 +26,11 @@ PER_PAGE = 10
 def main(request, page=1):
     quotes = Quote.objects.all()
     paginator = Paginator(list(quotes), per_page=PER_PAGE)
+    top_tags = Tag.objects.annotate(num_quotes=Count('quote')).order_by('-num_quotes')[:10]
 
-    context = {"quotes": paginator.page(page)}
+    context = {"quotes": paginator.page(page), 
+              'top_tags': top_tags, }
     return render(request, "quotes/index.html", context)
-
 
 def author(request, author: str):
     try:
@@ -141,12 +143,17 @@ class AddTagView(LoginRequiredMixin, View):
         else:
             messages.error(request, "Not added...")
             return render(request, self.template_name, context={"form": form})
+        
 
 
 
-# if __name__ == "__main__":
-#     db = conect.get_mongo_connection()
+
+
+#if __name__ == "__main__":
+#      db = conect.get_mongo_connection()
 #     quotes = db.quote.find()
 #     #quotes = Quote.objects.all()
 #     for quote in quotes:
-#         print(quote)
+#      print(quote)
+   
+   

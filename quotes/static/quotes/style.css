@@ -61,3 +61,11 @@
 	cursor: not-allowed;
 }
 
+.col-md-4 {
+	width: 33.33333333%;
+}
+
+.tags-box {
+	text-align: right;
+}
+
