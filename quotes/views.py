@@ -24,7 +24,8 @@ PER_PAGE = 10
     
 #     return render(request, 'quotes/index.html', context={'quotes': quotes_on_page})
 def main(request, page=1):
-    quotes = Quote.objects.all()
+    #quotes = Quote.objects.all()
+    quotes = Quote.objects.select_related('author').all()
     paginator = Paginator(list(quotes), per_page=PER_PAGE)
     top_tags = Tag.objects.annotate(num_quotes=Count('quote')).order_by('-num_quotes')[:10]
 

@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetDoneView
 from . import views
 
 app_name = 'users'

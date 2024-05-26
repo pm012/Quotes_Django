@@ -12,7 +12,8 @@
             <span class="text" itemprop="text">
                 {{quote.quote}}
             </span>
-            <span>by <small class="author" itemprop="author">{{quote.author.fullname}}</small>
+            <!--<span>by <small class="author" itemprop="author">{{quote.author.fullname}}</small>-->
+            <span>by <small class="author" itemprop="author">{{quote.author_id|author}}</small>
                 <a href="/author/{{quote.author.fullname}}">(about)</a>
             </span>
             <div class="tags">
