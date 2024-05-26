@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
 
-from .forms import RegisterForm, LoginForm, ProfileForm
+from .forms import RegisterForm, LoginForm, ProfileForm, CustomPasswordResetForm
 from django.urls import reverse_lazy
 
 
@@ -56,7 +56,11 @@ def logoutuser(request):
     logout(request)
     return redirect(to='quotes:main')
 
-class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
+
+
+class ResetPasswordView(SuccessMessageMixin, CustomPasswordResetView):
     template_name = 'users/password_reset.html'
     email_template_name = 'users/password_reset_email.html'
     html_email_template_name = 'users/password_reset_email.html'

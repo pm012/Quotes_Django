@@ -1,3 +1,11 @@
+.errorlist {
+	color: red;
+}
+
+.error input, .error select {
+	border: 2px red solid;
+	}
+
 .quote {
 	padding: 10px;
 	margin-bottom: 30px;
@@ -68,4 +76,6 @@
 .tags-box {
 	text-align: right;
 }
+
+
 

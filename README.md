@@ -1,5 +1,3 @@
-# Home Work 10 Django
-
 Instructions: 0. Navigate to project dir
 
 1. Run Postgre database docker-compose up -d
@@ -7,6 +5,17 @@ Instructions: 0. Navigate to project dir
 3. Migration command: "python -m hw10_django.utils.migration"
 4. launch the application `python manage.py runserver`
 5. Open http://localhost:8000
+
+# Home Work 13 (Part 1: Reset password and settings sequrity for HW 10 Django project)
+
+In this home task it is needed to finalize Django application from home work #10.
+
+Task description:
+
+- Implement mechanizm of reset password for registered user
+- All environment variables should be stored in a file .env and should be utilized in the settings.py file.
+
+# Home Work 10 Django
 
 Task description
 Create a site. The site should be created similar to http://quotes.toscrape.com .
