@@ -10,7 +10,7 @@ Instructions: 0. Navigate to project dir
 
 In this home task it is needed to finalize Django application from home work #10.
 
-Task description:
+## Task description:
 
 - Implement mechanizm of reset password for registered user
 - All environment variables should be stored in a file .env and should be utilized in the settings.py file.
