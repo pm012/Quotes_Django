@@ -1,6 +1,6 @@
 import os
 import django
-from hw10_django.utils import conect
+from mgr_django.utils import conect
 
 from pymongo import MongoClient
 
