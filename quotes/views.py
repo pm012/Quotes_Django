@@ -1,107 +1,51 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.contrib import messages
-#from django.contrib.auth.models import User
 from django.db.models import Count
 
 from .models import Quote, Author, Tag
-
 from .forms import AuthorForm, QuoteForm, TagForm
 
 PER_PAGE = 10
-# Create your views here.
-# def main(request, page=1):
-#     db = conect.get_mongo_connection()    
-#     quotes = db.quote.find()
-#     #quotes = Quote.objects.all()
-#     per_page = 10
-#     paginator = Paginator(list(quotes), per_page)
-#     quotes_on_page = paginator.page(page)
-    
-#     return render(request, 'quotes/index.html', context={'quotes': quotes_on_page})
-def main(request, page=1):
-    #quotes = Quote.objects.all()
-    quotes = Quote.objects.select_related('author').all()
-    paginator = Paginator(list(quotes), per_page=PER_PAGE)
-    top_tags = Tag.objects.annotate(num_quotes=Count('quote')).order_by('-num_quotes')[:10]
 
-    context = {"quotes": paginator.page(page), 
-              'top_tags': top_tags, }
+
+def main(request, page=1):
+    quotes_list = Quote.objects.select_related('author').prefetch_related('tags').all()
+    paginator = Paginator(quotes_list, per_page=PER_PAGE)
+    quotes_page = paginator.get_page(page)
+
+    top_tags = Tag.objects.annotate(num_quotes=Count('quotes')).order_by('-num_quotes')[:10]
+
+    context = {
+        "quotes": quotes_page,
+        "top_tags": top_tags,
+    }
     return render(request, "quotes/index.html", context)
 
-def author(request, author: str):
-    try:
-        author = Author.objects.get(fullname=author)
-    except:
-        author = None
-    context = {"author": author}
-    return render(request, "quotes/author.html", context)
+
+def author(request, author_name: str):
+    author_obj = get_object_or_404(Author, fullname=author_name)
+    return render(request, "quotes/author.html", {"author": author_obj})
 
 
-def tag(request, tag: str, page: int = 1):
-    quotes = []
-    tag_id = None
-    try:
-        tag_id = Tag.objects.get(name=tag).id
-    except:
-        ...
-    print(f"{tag=},{tag_id=}")
-    if tag_id:
-        quotes = Quote.objects.filter(tags=tag_id)
+def tag(request, tag_name: str, page: int = 1):
+    tag_obj = get_object_or_404(Tag, name=tag_name)
+    quotes_list = Quote.objects.filter(tags=tag_obj).select_related('author').prefetch_related('tags')
+    
+    paginator = Paginator(quotes_list, per_page=PER_PAGE)
+    quotes_page = paginator.get_page(page)
 
-    paginator = Paginator(quotes, per_page=PER_PAGE)
-    context = {"quotes": paginator.page(page), "tag_query": tag}
-    return render(request, "quotes/tag.html", context)    
+    top_tags = Tag.objects.annotate(num_quotes=Count('quotes')).order_by('-num_quotes')[:10]
 
-
-@login_required
-def add_author(request):
-    if request.method == "POST":
-        form = AuthorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            fullname = form.cleaned_data["fullname"]
-            messages.success(request, f"Author '{fullname}' was created...")
-            return render(
-                request, "quotes/add_author.html", context={"form": AuthorForm()}
-            )
-        else:
-            messages.error(request, "Not added...")
-            return render(request, "quotes/add_author.html", context={"form": form})
-
-    context = {"form": AuthorForm()}
-    return render(request, "quotes/add_author.html", context)
-
-
-@login_required
-def add_quote(request, id: int = 0):
-    tags = Tag.objects.all()
-    authors = Author.objects.all()
-
-    if request.method == "POST":
-        form = QuoteForm(request.POST)
-        print(request.POST)
-        if form.is_valid():
-            new_quote = form.save(commit=False)
-            new_quote.quote = form.cleaned_data['quote']
-            new_quote.author = Author.objects.filter(pk=form.cleaned_data['author']).get()
-            new_quote.save()
-
-            choice_tags = Tag.objects.filter(
-                name__in=request.POST.getlist("tags")
-            )
-            for tag in choice_tags.iterator():
-                new_quote.tags.add(tag)
-            messages.success(request, "Quote was added....")
-        else:
-            messages.error(request, "Not added....")
-            return render(request, "quotes/add_quote.html", {"tags": tags, "authors": authors, "form": form})
-
-    return render(request, "quotes/add_quote.html", {"tags": tags, "authors": authors, "form": QuoteForm()})
+    context = {
+        "quotes": quotes_page,
+        "tag_query": tag_name,
+        "top_tags": top_tags,
+    }
+    return render(request, "quotes/tag.html", context)
 
 
 class AddAuthorView(LoginRequiredMixin, View):
@@ -109,20 +53,17 @@ class AddAuthorView(LoginRequiredMixin, View):
     template_name = "quotes/add_author.html"
 
     def get(self, request):
-        return render(request, self.template_name, context={"form": self.form_class})
+        return render(request, self.template_name, {"form": self.form_class()})
 
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
-            form.save()
-            fullname = form.cleaned_data["fullname"]
-            messages.success(request, f"Author '{fullname}' was created...")
-            return render(
-                request, self.template_name, context={"form": self.form_class}
-            )
-        else:
-            messages.error(request, "Not added...")
-            return render(request, self.template_name, context={"form": form})
+            author_obj = form.save()
+            messages.success(request, f"Author '{author_obj.fullname}' was successfully created!")
+            return redirect("quotes:main")
+        
+        messages.error(request, "Please correct the errors below.")
+        return render(request, self.template_name, {"form": form})
 
 
 class AddTagView(LoginRequiredMixin, View):
@@ -130,31 +71,32 @@ class AddTagView(LoginRequiredMixin, View):
     template_name = "quotes/add_tag.html"
 
     def get(self, request):
-        return render(request, self.template_name, context={"form": self.form_class})
+        return render(request, self.template_name, {"form": self.form_class()})
 
     def post(self, request):
         form = self.form_class(request.POST)
         if form.is_valid():
-            form.save()
-            fullname = form.cleaned_data["name"]
-            messages.success(request, f"Tag '{fullname}' was created...")
-            return render(
-                request, self.template_name, context={"form": self.form_class}
-            )
-        else:
-            messages.error(request, "Not added...")
-            return render(request, self.template_name, context={"form": form})
+            tag_obj = form.save()
+            messages.success(request, f"Tag '{tag_obj.name}' was successfully created!")
+            return redirect("quotes:main")
         
+        messages.error(request, "Please correct the errors below.")
+        return render(request, self.template_name, {"form": form})
 
 
+class AddQuoteView(LoginRequiredMixin, View):
+    form_class = QuoteForm
+    template_name = "quotes/add_quote.html"
 
+    def get(self, request):
+        return render(request, self.template_name, {"form": self.form_class()})
 
-
-#if __name__ == "__main__":
-#      db = conect.get_mongo_connection()
-#     quotes = db.quote.find()
-#     #quotes = Quote.objects.all()
-#     for quote in quotes:
-#      print(quote)
-   
-   
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            quote_obj = form.save()
+            messages.success(request, "Quote was successfully added!")
+            return redirect("quotes:main")
+        
+        messages.error(request, "Failed to add quote. Please check the form.")
+        return render(request, self.template_name, {"form": form})

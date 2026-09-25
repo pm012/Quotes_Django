@@ -3,42 +3,47 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, Pass
 from django.contrib.auth.models import User
 from .models import Profile
 
+
 class RegisterForm(UserCreationForm):
-    username = forms.CharField(max_length=100,
-                               required=True,
-                               widget=forms.TextInput())
-    
-    email = forms.CharField(max_length=100,
-                               required=True,
-                               widget=forms.TextInput())
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Email address"})
+    )
 
-    password1 = forms.CharField(max_length=50,
-                                required=True,
-                                widget=forms.PasswordInput())
-    password2 = forms.CharField(max_length=50,
-                                required=True,
-                                widget=forms.PasswordInput())
-
-    class Meta:
+    class Meta(UserCreationForm.Meta):
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ["username", "email"]
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email
+
 
 class LoginForm(AuthenticationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Username"})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Password"})
+    )
 
-    class Meta:
-        model = User
-        fields = ['username', 'password']
 
 class ProfileForm(forms.ModelForm):
-    avatar = forms.ImageField(widget=forms.FileInput())
+    avatar = forms.ImageField(
+        widget=forms.FileInput(attrs={"class": "form-control-file"}),
+        required=False
+    )
 
     class Meta:
         model = Profile
-        fields = ['avatar']
+        fields = ["avatar"]
+
 
 class CustomPasswordResetForm(PasswordResetForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if not User.objects.filter(email=email).exists():
+        if not User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError('There is no user registered with the specified email address.')
         return email

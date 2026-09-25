@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.views import PasswordResetView
+from django.contrib.auth.views import PasswordResetView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 
 from .forms import RegisterForm, LoginForm, ProfileForm, CustomPasswordResetForm
-from django.urls import reverse_lazy
 
 
 @login_required
@@ -15,46 +16,58 @@ def profile(request):
         profile_form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if profile_form.is_valid():
             profile_form.save()
-            messages.success(request, 'Your profile is updated successfully')
-            return redirect(to='users:profile')
+            messages.success(request, 'Your profile was updated successfully!')
+            return redirect('users:profile')
+        messages.error(request, 'Please correct the error below.')
+    else:
+        profile_form = ProfileForm(instance=request.user.profile)
 
-    profile_form = ProfileForm(instance=request.user.profile)
     return render(request, 'users/profile.html', {'profile_form': profile_form})
+
 
 def signupuser(request):
     if request.user.is_authenticated:
-        return redirect(to='quotes:main')
+        return redirect('quotes:main')
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect(to='quotes:main')
-        else:
-            return render(request, 'users/signup.html', context={"form": form})
+            user = form.save()
+            login(request, user)
+            messages.success(request, f"Account created successfully for {user.username}!")
+            return redirect('quotes:main')
+        messages.error(request, 'Registration failed. Please check the form.')
+    else:
+        form = RegisterForm()
 
-    return render(request, 'users/signup.html', context={"form": RegisterForm()})
+    return render(request, 'users/signup.html', {'form': form})
 
 
 def loginuser(request):
     if request.user.is_authenticated:
-       return redirect(to='quotes:main')
+        return redirect('quotes:main')
 
     if request.method == 'POST':
-        user = authenticate(username=request.POST['username'], password=request.POST['password'])
-        if user is None:
-            messages.error(request, 'Username or password didn\'t match')
-            return redirect(to='users:login')
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.username}!")
+            return redirect('quotes:main')
+        messages.error(request, "Invalid username or password.")
+    else:
+        form = LoginForm()
 
-        login(request, user)
-        return redirect(to='quotes:main')
+    return render(request, 'users/login.html', {'form': form})
 
-    return render(request, 'users/login.html', context={"form": LoginForm()})
 
 @login_required
+@require_POST
 def logoutuser(request):
     logout(request)
-    return redirect(to='quotes:main')
+    messages.info(request, "You have been logged out.")
+    return redirect('quotes:main')
+
 
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
@@ -67,4 +80,3 @@ class ResetPasswordView(SuccessMessageMixin, CustomPasswordResetView):
     success_url = reverse_lazy('users:password_reset_done')
     success_message = "An email with instructions to reset your password has been sent to %(email)s."
     subject_template_name = 'users/password_reset_subject.txt'
-
