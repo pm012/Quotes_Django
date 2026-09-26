@@ -20,3 +20,34 @@ dotenv = "^0.9.9"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-django (>=4.14.0,<5.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "mgr_django.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "--ds=mgr_django.settings"
+
+[tool.coverage.run]
+source = ["quotes", "users", "mgr_django"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/tests.py",
+    "manage.py",
+    "mgr_django/asgi.py",
+    "mgr_django/wsgi.py",
+    "mgr_django/utils/scraping/*",
+    "mgr_django/utils/scrapped_json_to_mongo/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "def __str__",
+]

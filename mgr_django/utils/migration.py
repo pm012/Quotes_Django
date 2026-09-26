@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-# Add the project root to sys.path for correct import
+# Add project root to sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
@@ -16,22 +16,22 @@ from quotes.models import Quote, Tag, Author
 from mgr_django.utils.conect import get_mongo_connection
 
 
-
 def migrate_data():
     try:
         db = get_mongo_connection()
-        print("Connected to MongoDB successfully.")
+        print(f"Connected to MongoDB database: '{db.name}' successfully.")
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
         return
 
-    authors_mongo = list(db.author.find())
-    quotes_mongo = list(db.quote.find())
+    # Call callections as documents are called: authors та quotes
+    authors_mongo = list(db.authors.find())
+    quotes_mongo = list(db.quotes.find())
 
     print(f"Found {len(authors_mongo)} authors and {len(quotes_mongo)} quotes in MongoDB.")
 
     with transaction.atomic():
-        # 1. Migration of authors
+        # 1. Міграція авторів
         for author in authors_mongo:
             Author.objects.get_or_create(
                 fullname=author.get('fullname', '').strip(),
@@ -52,7 +52,8 @@ def migrate_data():
 
             quote_text = quote.get('quote', '').strip()
             if not Quote.objects.filter(quote=quote_text).exists():
-                author_data = db.author.find_one({'_id': quote['author']})
+                # Search author in the collection db.authors using ObjectId
+                author_data = db.authors.find_one({'_id': quote['author']})
                 author_obj = None
                 
                 if author_data:
