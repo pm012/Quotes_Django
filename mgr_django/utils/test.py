@@ -6,7 +6,7 @@ from django.db.models import Count
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hw10_django.settings")
 django.setup()
 
-from quotes.models import Quote, Tag, Author
+from quotes.models import Tag
 
 
 
