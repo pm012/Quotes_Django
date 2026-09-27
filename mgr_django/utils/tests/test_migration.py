@@ -4,6 +4,13 @@ from mgr_django.utils.conect import get_mongo_connection_uri
 from mgr_django.utils.migration import migrate_data
 from quotes.models import Author, Quote, Tag
 
+from mgr_django.utils.migration import migrate_data
+
+def test_migration_script(db):
+    migrate_data()
+    # Перевіряємо, що дані дійсно записалися в БД
+    assert Author.objects.count() > 0
+    assert Quote.objects.count() > 0
 
 def test_get_mongo_connection_uri():
     db_name, uri = get_mongo_connection_uri()

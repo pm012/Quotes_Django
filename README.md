@@ -172,3 +172,14 @@ Quotes_Django/
 ├── manage.py                       # Django management runner
 ├── pyproject.toml                  # Poetry dependencies file
 └── README.md
+
+
+TBD Add pytest descirption
+Запустіть pytest з вимірюванням покриття коду:
+
+Bash
+poetry run pytest --cov=. --cov-report=term-missing
+Для візуального перегляду того, які саме рядки не покриті, згенеруйте HTML-звіт:
+
+Bash
+poetry run pytest --cov=. --cov-report=html

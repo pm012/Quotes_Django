@@ -97,12 +97,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MAILERS = {
     "default": {
         "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
-        "HOST": config('EMAIL_HOST', default='smtp.gmail.com'),
-        "PORT": config('EMAIL_PORT', cast=int, default=587),
-        "USE_TLS": config('EMAIL_USE_TLS', cast=bool, default=True),
-        "USE_SSL": config('EMAIL_USE_SSL', cast=bool, default=False),
-        "USERNAME": config('EMAIL_HOST_USER', default=''),
-        "PASSWORD": config('EMAIL_HOST_PASSWORD', default=''),
+        "HOST": env('EMAIL_HOST', default='smtp.gmail.com'),
+        "PORT": env.int('EMAIL_PORT', default=465),
+        "USE_SSL": env.bool('EMAIL_USE_SSL', default=True),
+        "USE_TLS": env.bool('EMAIL_USE_TLS', default=False),
+        "USERNAME": env('EMAIL_HOST_USER', default=''),
+        "PASSWORD": env('EMAIL_HOST_PASSWORD', default=''),
     }
 }
 

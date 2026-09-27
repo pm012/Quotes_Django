@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from quotes.models import Author, Tag, Quote
 from quotes.forms import AuthorForm, TagForm, QuoteForm
+from quotes.templatetags.extract_tags import tagslist
 
 
 @pytest.mark.django_db
@@ -128,16 +129,33 @@ class TestQuotesViews:
         })
         assert response.status_code in (200, 302)
 
-    def test_add_author_invalid_post(client, user):
-        client.force_login(user)
-        # Empty form for creating author
+    def test_add_author_invalid_post(self, client, setup_data):
+        user, _, _, _ = setup_data
+        client.force_login(user)  # Pass  user object
         response = client.post(reverse('quotes:add_author'), data={})
         assert response.status_code == 200
         assert response.context['form'].errors
 
-    def test_add_quote_invalid_post(client, user):
-        client.force_login(user)
-        # Empty quote form
+    def test_add_quote_invalid_post(self, client, setup_data):
+        user, _, _, _ = setup_data
+        client.force_login(user)  
         response = client.post(reverse('quotes:add_quote'), data={})
         assert response.status_code == 200
         assert response.context['form'].errors
+
+    def test_author_not_found(self, client, db):
+        response = client.get(reverse('quotes:author', kwargs={'author_name': 'Non Existent Author'}))
+        assert response.status_code in (404, 200)  # залежно від того, як реалізована 404 у views
+
+    def test_pagination_out_of_bounds(self, client, db):
+        url = reverse('quotes:main') + '?page=999'
+        response = client.get(url)
+        assert response.status_code == 200
+
+    def test_extract_tags_filter_edge_cases(self, db):
+        author = Author.objects.create(fullname="No Tag Author")
+        quote = Quote.objects.create(quote="No tags here", author=author)
+
+        # Передаємо quote.tags, а не сам quote
+        result = tagslist(quote.tags)
+        assert list(result) == []
