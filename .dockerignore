@@ -1,0 +1,30 @@
+# Git, documentation and local tooling
+.git
+.gitignore
+README.md
+LICENSE
+docs/
+htmlcov/
+tests/
+frontend/
+
+# Local virtual environment (the most important!)
+.venv
+venv
+ENV
+
+# Cache for Python and Pytest
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.cache/
+
+# Local secrets
+.env
+env-sample.cfg
+
+# Local databases and logs
+*.db
+*.log
