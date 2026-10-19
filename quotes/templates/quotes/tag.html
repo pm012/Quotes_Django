@@ -22,6 +22,14 @@
                 <a class="tag" href="{% url 'quotes:tag' tag.name %}">{{ tag.name }}</a>
                 {% endfor %}
             </div>
+            {% if user.is_authenticated %}
+            {% if user.is_staff or user == quote.created_by %}
+            <div class="quote-actions">
+                <a href="{% url 'quotes:edit_quote' quote.id %}">Edit</a>
+                <a href="{% url 'quotes:delete_quote' quote.id %}">Delete</a>
+            </div>
+            {% endif %}
+            {% endif %}
         </article>
         {% empty %}
         <div class="empty-state"><h2>No quotes found</h2><p>There are no quotes with this topic yet.</p></div>

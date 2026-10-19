@@ -46,13 +46,18 @@ class TestQuotesForms:
 
     def test_quote_form_valid(self):
         author = Author.objects.create(fullname="Author For Form")
-        tag = Tag.objects.create(name="physics")
+        tags = [
+            Tag.objects.create(name="physics"),
+            Tag.objects.create(name="astronomy"),
+        ]
         form = QuoteForm(data={
             'quote': 'Science is cool',
             'author': author.id,
-            'tags': [tag.id]
+            'tags': [tag.id for tag in tags]
         })
         assert form.is_valid()
+        assert set(form.cleaned_data['tags']) == set(tags)
+        assert form.fields['tags'].widget.allow_multiple_selected
 
 
 @pytest.mark.django_db
@@ -120,22 +125,97 @@ class TestQuotesViews:
 
     def test_add_quote_view_authenticated(self, client, setup_data):
         user, author, tag, _ = setup_data
+        second_tag = Tag.objects.create(name='wonder')
         client.login(username='testuser', password='password123')
 
         form_response = client.get(reverse('quotes:add_quote'))
         assert form_response.status_code == 200
         assert f'value="{author.id}"'.encode() in form_response.content
         assert f'value="{tag.id}"'.encode() in form_response.content
+        assert b'type="checkbox"' in form_response.content
 
         response = client.post(reverse('quotes:add_quote'), {
             'quote': 'Imagination is everything.',
             'author': author.id,
-            'tags': [tag.id]
+            'tags': [tag.id, second_tag.id]
         })
         assert response.status_code == 302
         quote = Quote.objects.get(quote='Imagination is everything.')
         assert quote.author == author
-        assert list(quote.tags.all()) == [tag]
+        assert set(quote.tags.all()) == {tag, second_tag}
+        assert quote.created_by == user
+
+    def test_owner_can_edit_and_delete_quote(self, client, setup_data):
+        user, author, tag, quote = setup_data
+        quote.created_by = user
+        quote.save(update_fields=['created_by'])
+        client.force_login(user)
+
+        edit_response = client.post(
+            reverse('quotes:edit_quote', args=[quote.id]),
+            {
+                'quote': 'An updated thought',
+                'author': author.id,
+                'tags': [tag.id],
+            },
+        )
+        assert edit_response.status_code == 302
+        quote.refresh_from_db()
+        assert quote.quote == 'An updated thought'
+
+        delete_response = client.post(
+            reverse('quotes:delete_quote', args=[quote.id]),
+        )
+        assert delete_response.status_code == 302
+        assert not Quote.objects.filter(pk=quote.pk).exists()
+
+    def test_user_cannot_edit_or_delete_another_users_quote(self, client, setup_data):
+        _, _, _, quote = setup_data
+        owner = User.objects.get(username='testuser')
+        quote.created_by = owner
+        quote.save(update_fields=['created_by'])
+        legacy_quote = Quote.objects.create(
+            quote='A legacy quote without an owner',
+            author=quote.author,
+        )
+        client.force_login(User.objects.create_user(
+            username='otheruser',
+            password='password123',
+        ))
+
+        assert client.get(reverse('quotes:edit_quote', args=[quote.id])).status_code == 404
+        assert client.get(reverse('quotes:delete_quote', args=[quote.id])).status_code == 404
+        assert client.get(
+            reverse('quotes:edit_quote', args=[legacy_quote.id])
+        ).status_code == 404
+
+    def test_staff_can_manage_quotes_without_an_owner(self, client, setup_data):
+        _, author, _, quote = setup_data
+        staff = User.objects.create_user(
+            username='staffuser',
+            password='password123',
+            is_staff=True,
+        )
+        client.force_login(staff)
+
+        assert client.get(reverse('quotes:edit_quote', args=[quote.id])).status_code == 200
+        assert client.get(reverse('quotes:delete_quote', args=[quote.id])).status_code == 200
+
+        edit_response = client.post(
+            reverse('quotes:edit_quote', args=[quote.id]),
+            {
+                'quote': 'Admin-edited legacy quote',
+                'author': author.id,
+                'tags': [],
+            },
+        )
+        assert edit_response.status_code == 302
+        quote.refresh_from_db()
+        assert quote.quote == 'Admin-edited legacy quote'
+
+        delete_response = client.post(reverse('quotes:delete_quote', args=[quote.id]))
+        assert delete_response.status_code == 302
+        assert not Quote.objects.filter(pk=quote.pk).exists()
 
     def test_add_author_invalid_post(self, client, setup_data):
         user, _, _, _ = setup_data

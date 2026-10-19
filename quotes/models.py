@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class Author(models.Model):
@@ -32,6 +33,13 @@ class Tag(models.Model):
 class Quote(models.Model):
     quote = models.TextField()
     tags = models.ManyToManyField(Tag, related_name='quotes')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='quotes',
+        null=True,
+        blank=True,
+    )
     author = models.ForeignKey(
         Author, 
         on_delete=models.CASCADE, 

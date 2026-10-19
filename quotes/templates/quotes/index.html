@@ -26,6 +26,14 @@
                 <span class="muted">No tags</span>
                 {% endfor %}
             </div>
+            {% if user.is_authenticated %}
+            {% if user.is_staff or user == quote.created_by %}
+            <div class="quote-actions">
+                <a href="{% url 'quotes:edit_quote' quote.id %}">Edit</a>
+                <a href="{% url 'quotes:delete_quote' quote.id %}">Delete</a>
+            </div>
+            {% endif %}
+            {% endif %}
         </article>
         {% empty %}
         <div class="empty-state">
@@ -33,7 +41,6 @@
             <p>There are no quotes to show right now. Check back soon.</p>
         </div>
         {% endfor %}
-                </li>
         {% if quotes.paginator.num_pages > 1 %}
         <nav aria-label="Quote pages">
             <ul class="pager">

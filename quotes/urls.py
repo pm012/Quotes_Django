@@ -12,4 +12,6 @@ urlpatterns = [
     path('add/author/', views.AddAuthorView.as_view(), name='add_author'),
     path('add/tag/', views.AddTagView.as_view(), name='add_tag'),    
     path('add/quote/', views.AddQuoteView.as_view(), name='add_quote'),
+    path('quote/<int:quote_id>/edit/', views.EditQuoteView.as_view(), name='edit_quote'),
+    path('quote/<int:quote_id>/delete/', views.DeleteQuoteView.as_view(), name='delete_quote'),
 ]

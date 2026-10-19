@@ -55,6 +55,24 @@ class TestUsersViews:
         client.force_login(user)
         response = client.get(reverse('users:profile'))
         assert response.status_code == 200
+        assert b'id="avatar-preview"' in response.content
+        assert b'id_first_name' in response.content
+        assert b'id_last_name' in response.content
+        assert b'users/profile.js' in response.content
+
+    def test_profile_updates_first_and_last_name(self, client, db):
+        user = User.objects.create_user(username='profileuser', password='password123')
+        client.force_login(user)
+
+        response = client.post(reverse('users:profile'), {
+            'first_name': 'Ada',
+            'last_name': 'Lovelace',
+        })
+
+        assert response.status_code == 302
+        user.refresh_from_db()
+        assert user.first_name == 'Ada'
+        assert user.last_name == 'Lovelace'
 
     def test_password_reset_views(self, client):
         # Verification of availability of reset password pages

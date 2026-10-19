@@ -38,7 +38,7 @@ class QuoteForm(forms.ModelForm):
     )
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all(),
-        widget=forms.SelectMultiple(attrs={"class": "form-select", "size": "6"}),
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "tags-checkboxes"}),
         required=False
     )
 

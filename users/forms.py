@@ -39,3 +39,19 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["avatar"]
+
+
+class UserNameForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name"]
+        widgets = {
+            "first_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "autocomplete": "given-name",
+            }),
+            "last_name": forms.TextInput(attrs={
+                "class": "form-control",
+                "autocomplete": "family-name",
+            }),
+        }

@@ -3,25 +3,35 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetView
+from django.db import transaction
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 
-from .forms import RegisterForm, LoginForm, ProfileForm
+from .forms import RegisterForm, LoginForm, ProfileForm, UserNameForm
 
 
 @login_required
 def profile(request):
     if request.method == 'POST':
         profile_form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
-        if profile_form.is_valid():
-            profile_form.save()
+        user_form = UserNameForm(request.POST, instance=request.user)
+        profile_is_valid = profile_form.is_valid()
+        user_is_valid = user_form.is_valid()
+        if profile_is_valid and user_is_valid:
+            with transaction.atomic():
+                user_form.save()
+                profile_form.save()
             messages.success(request, 'Your profile was updated successfully!')
             return redirect('users:profile')
         messages.error(request, 'Please correct the error below.')
     else:
         profile_form = ProfileForm(instance=request.user.profile)
+        user_form = UserNameForm(instance=request.user)
 
-    return render(request, 'users/profile.html', {'profile_form': profile_form})
+    return render(request, 'users/profile.html', {
+        'profile_form': profile_form,
+        'user_form': user_form,
+    })
 
 
 def signupuser(request):

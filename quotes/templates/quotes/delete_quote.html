@@ -1,0 +1,16 @@
+{% extends 'quotes/base.html' %}
+{% block content %}
+<section class="form-card">
+    <p class="eyebrow">Remove a quote</p>
+    <h1>Delete this quote?</h1>
+    <blockquote class="delete-quote-preview">{{ object.quote }}</blockquote>
+    <p>This action cannot be undone.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button class="btn btn-danger" type="submit">Delete quote</button>
+            <a class="btn btn-outline-primary" href="{% url 'quotes:main' %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

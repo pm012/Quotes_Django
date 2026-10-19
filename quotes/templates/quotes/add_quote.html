@@ -2,7 +2,7 @@
 {% block content %}
 <section class="form-card">
     <p class="eyebrow">Share a little wisdom</p>
-    <h1>Add a quote</h1>
+    <h1>{% if object %}Edit quote{% else %}Add a quote{% endif %}</h1>
     <form method="post" novalidate>
         {% csrf_token %}
         {% for field in form %}
@@ -15,7 +15,7 @@
         {% endfor %}
         {% for error in form.non_field_errors %}<p class="field-errors">{{ error }}</p>{% endfor %}
         <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Save quote</button>
+            <button class="btn btn-primary" type="submit">{% if object %}Save changes{% else %}Save quote{% endif %}</button>
             <a class="btn btn-outline-primary" href="{% url 'quotes:main' %}">Cancel</a>
         </div>
     </form>

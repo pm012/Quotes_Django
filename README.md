@@ -7,7 +7,9 @@ A full-featured Web Application built with Django that allows users to explore, 
 ## Features
 
 - **Quote Management**: Browse quotes with pagination, view detailed author profiles, and filter quotes by tags.
+- **Quote Contributions**: Signed-in users can create quotes, select multiple tags with checkboxes, and edit or delete their own contributions. Staff administrators can manage all quotes; legacy quotes without an owner remain admin-managed.
 - **User Authentication**: Complete user lifecycle including Sign Up, Login, Logout (via POST request for security), and Profile management.
+- **Profile Settings**: Update your first and last name and preview an avatar before saving it.
 - **Password Reset**: Email-based password recovery via SMTP integration.
 - **Data Migration Tool**: Automated script using PyMongo and Django ORM to migrate legacy MongoDB data (`authors` & `quotes` collections) directly into PostgreSQL/SQLite without duplicating records.
 - **Secure Configuration**: Environment variables managed via `.env` files for security and easy deployment.
