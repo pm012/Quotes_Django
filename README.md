@@ -83,6 +83,11 @@ EMAIL_HOST_PASSWORD=your_app_password
 
 
 ### 3. Database Setup & Migrations
+Launch postgres Database
+```bash
+docker compose up -d
+```
+
 Run Django migrations to create the relational database schema:
 
 ```bash
