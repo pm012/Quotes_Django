@@ -17,12 +17,8 @@ from mgr_django.utils.conect import get_mongo_connection
 
 
 def migrate_data():
-    try:
-        db = get_mongo_connection()
-        print(f"Connected to MongoDB database: '{db.name}' successfully.")
-    except Exception as e:
-        print(f"Error connecting to MongoDB: {e}")
-        return
+    db = get_mongo_connection()
+    print(f"Connected to MongoDB database: '{db.name}' successfully.")
 
     # Call callections as documents are called: authors та quotes
     authors_mongo = list(db.authors.find())
@@ -31,9 +27,11 @@ def migrate_data():
     print(f"Found {len(authors_mongo)} authors and {len(quotes_mongo)} quotes in MongoDB.")
 
     with transaction.atomic():
+        authors_by_id: dict[object, Author] = {}
+
         # 1. Міграція авторів
         for author in authors_mongo:
-            Author.objects.get_or_create(
+            author_obj, _ = Author.objects.get_or_create(
                 fullname=author.get('fullname', '').strip(),
                 defaults={
                     'born_date': author.get('born_date', ''),
@@ -41,29 +39,26 @@ def migrate_data():
                     'description': author.get('description', '')
                 }
             )
+            authors_by_id[author['_id']] = author_obj
         print("Authors migration complete.")
 
         # 2. Migration of quotes and tags
+        tags_by_name: dict[str, Tag] = {}
         for quote in quotes_mongo:
             tags_objs = []
             for tag_name in quote.get('tags', []):
-                t_obj, _ = Tag.objects.get_or_create(name=tag_name.strip().lower())
-                tags_objs.append(t_obj)
+                normalized_name = tag_name.strip().lower()
+                if normalized_name not in tags_by_name:
+                    tags_by_name[normalized_name], _ = Tag.objects.get_or_create(
+                        name=normalized_name
+                    )
+                tags_objs.append(tags_by_name[normalized_name])
 
             quote_text = quote.get('quote', '').strip()
             if not Quote.objects.filter(quote=quote_text).exists():
-                # Search author in the collection db.authors using ObjectId
-                author_data = db.authors.find_one({'_id': quote['author']})
-                author_obj = None
-                
-                if author_data:
-                    author_obj = Author.objects.filter(
-                        fullname=author_data.get('fullname', '').strip()
-                    ).first()
-
                 q_obj = Quote.objects.create(
                     quote=quote_text,
-                    author=author_obj
+                    author=authors_by_id.get(quote.get('author'))
                 )
                 q_obj.tags.add(*tags_objs)
 

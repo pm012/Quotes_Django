@@ -1,0 +1,59 @@
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+    --primary: #154c3e;
+    --primary-fg: #fff;
+    --secondary: #17695d;
+    --accent: #7bd4c5;
+
+    --body-fg: #103c32;
+    --body-bg: rgb(123, 212, 197);
+    --body-quiet-color: #55746c;
+    --body-medium-color: #31594f;
+    --body-loud-color: #103c32;
+
+    --header-color: #fff;
+    --header-branding-color: #7bd4c5;
+    --header-bg: #103c32;
+    --header-link-color: #fff;
+
+    --breadcrumbs-fg: #fff;
+    --breadcrumbs-link-fg: #fff;
+    --breadcrumbs-bg: #17695d;
+
+    --link-fg: #154c3e;
+    --link-hover-color: #17695d;
+    --link-selected-fg: #103c32;
+
+    --darkened-bg: #edf6f3;
+    --selected-bg: #dcefeb;
+    --selected-row: #dcefeb;
+
+    --button-fg: #fff;
+    --button-bg: #154c3e;
+    --button-hover-bg: #103c32;
+    --default-button-bg: #17695d;
+    --default-button-hover-bg: #154c3e;
+
+    --message-info-bg: #dcefeb;
+    color-scheme: light;
+}
+
+body.login {
+    background: var(--body-bg);
+}
+
+body.login #container {
+    overflow: hidden;
+    border: 1px solid #c8ded8;
+    border-radius: 0.75rem;
+    background: var(--darkened-bg);
+    box-shadow: 0 10px 28px rgba(16, 60, 50, 0.1);
+}
+
+body.login #container input[type="text"],
+body.login #container input[type="password"] {
+    border-color: #b5cec7;
+    background: #fff;
+    color: #103c32;
+}

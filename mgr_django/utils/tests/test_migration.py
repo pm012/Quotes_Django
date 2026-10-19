@@ -1,16 +1,11 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from mgr_django.utils.conect import get_mongo_connection_uri
 from mgr_django.utils.migration import migrate_data
 from quotes.models import Author, Quote, Tag
 
-from mgr_django.utils.migration import migrate_data
-
-def test_migration_script(db):
-    migrate_data()
-    # Перевіряємо, що дані дійсно записалися в БД
-    assert Author.objects.count() > 0
-    assert Quote.objects.count() > 0
 
 def test_get_mongo_connection_uri():
     db_name, uri = get_mongo_connection_uri()
@@ -26,6 +21,7 @@ def test_migrate_data(mock_get_mongo):
     mock_get_mongo.return_value = mock_db
 
     mock_db.authors.find.return_value = [{
+        '_id': '12345',
         'fullname': 'Mocked Author',
         'born_date': 'Jan 1, 1900',
         'born_location': 'Mock City',
@@ -39,10 +35,9 @@ def test_migrate_data(mock_get_mongo):
         'tags': ['mocktag']
     }]
     
-    mock_db.authors.find_one.return_value = {'fullname': 'Mocked Author'}
-
     migrate_data()
 
     assert Author.objects.filter(fullname='Mocked Author').exists()
     assert Tag.objects.filter(name='mocktag').exists()
     assert Quote.objects.filter(quote='Mocked Quote Text').exists()
+    mock_db.authors.find_one.assert_not_called()

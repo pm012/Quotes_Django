@@ -1,14 +1,17 @@
 {% extends 'quotes/base.html' %}
 {% block content %}
-
-<div class="author-details">
-    <h3 class="author-title">{{author.fullname}}</h3>
-    <p><strong>Born:</strong> <span class="author-born-date">{{author.born_date}}</span> <span
-            class="author-born-location">{{author.born_location}}</span></p>
-    <p><strong>Description:</strong></p>
-    <div class="author-description">
-        {{author.description}}
-    </div>
-</div>
-
+<section class="detail-card author-details">
+    <p class="eyebrow">About the author</p>
+    <h1 class="author-title">{{ author.fullname }}</h1>
+    {% if author.born_date or author.born_location %}
+    <p><strong>Born</strong>{% if author.born_date %} {{ author.born_date }}{% endif %}{% if author.born_location %} · {{ author.born_location }}{% endif %}</p>
+    {% endif %}
+    {% if author.description %}
+    <h2>Biography</h2>
+    <div class="author-description">{{ author.description|linebreaks }}</div>
+    {% else %}
+    <p class="muted">No biography has been added yet.</p>
+    {% endif %}
+    <a class="back-link" href="{% url 'quotes:main' %}">← Back to all quotes</a>
+</section>
 {% endblock %}

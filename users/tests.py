@@ -2,6 +2,8 @@ import pytest
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+from django.core import mail
+from django.test import override_settings
 
 User = get_user_model()
 
@@ -61,6 +63,33 @@ class TestUsersViews:
 
         post_resp = client.post(reverse('users:password_reset'), {'email': 'test@example.com'})
         assert post_resp.status_code in (200, 302)
+
+    @override_settings(MAILERS={
+        'default': {
+            'BACKEND': 'django.core.mail.backends.locmem.EmailBackend',
+        },
+    })
+    def test_password_reset_does_not_reveal_unknown_email(self, client):
+        User.objects.create_user(
+            username='reset-user',
+            email='known@example.com',
+            password='valid-password-123',
+        )
+
+        unknown_response = client.post(
+            reverse('users:password_reset'),
+            {'email': 'unknown@example.com'},
+            follow=True,
+        )
+        known_response = client.post(
+            reverse('users:password_reset'),
+            {'email': 'known@example.com'},
+            follow=True,
+        )
+
+        assert unknown_response.status_code == known_response.status_code == 200
+        assert unknown_response.content == known_response.content
+        assert len(mail.outbox) == 1
 
     def test_profile_model_methods(self, db):
         user = User.objects.create_user(username='avataruser', password='password123')

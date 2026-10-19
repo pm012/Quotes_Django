@@ -2,39 +2,47 @@
 {% load extract_tags %}
 {% block content %}
 
+<div class="page-heading">
+    <p class="eyebrow">Browse by topic</p>
+    <h1>Quotes tagged “{{ tag_query }}”</h1>
+</div>
 <div class="row">
-    <div class="col-md">
+    <section class="col-md" aria-label="Quotes with this tag">
         {% for quote in quotes %}
-        <div class="quote">
+        <article class="quote">
             <span class="text" itemprop="text">{{ quote.quote }}</span>
-            <span>by <small class="author" itemprop="author">{{ quote.author.fullname }}</small>
+            <span class="quote-attribution">by <small class="author" itemprop="author">{{ quote.author.fullname|default:"Unknown author" }}</small>
+                {% if quote.author %}
                 <a href="{% url 'quotes:author' quote.author.fullname %}">(about)</a>
+                {% endif %}
             </span>
             <div class="tags">
-                Tags:
+                <span class="tags-label">Filed under</span>
                 {% for tag in quote.tags.all %}
-                <a class="tag" href="{% url 'quotes:tag' tag %}">{{tag.name}}</a>
+                <a class="tag" href="{% url 'quotes:tag' tag.name %}">{{ tag.name }}</a>
                 {% endfor %}
-
             </div>
-        </div>
+        </article>
+        {% empty %}
+        <div class="empty-state"><h2>No quotes found</h2><p>There are no quotes with this topic yet.</p></div>
         {% endfor %}
+        {% if quotes.paginator.num_pages > 1 %}
         <nav>
-            <ul class="pager">
-                <li class="previous">
-                    <a title="Now is page {{ quotes.number }} of {{ quotes.paginator.num_pages }}"
-                        class="{% if not quotes.has_previous %} disabled {% endif %}" href="{% if quotes.has_previous %}  
-                    {% url 'quotes:tag_paginate' tag_query quotes.previous_page_number %}  {% else %} # {% endif %}">
-                        <span aria-hidden="true">←</span> Previous</a>
+            <ul class="pager" aria-label="Quote pages">
+                <li>
+                    {% if quotes.has_previous %}
+                    <a href="{% url 'quotes:tag_paginate' tag_query quotes.previous_page_number %}">← Previous</a>
+                    {% else %}<span class="disabled">← Previous</span>{% endif %}
                 </li>
-                <li class="next">
-                    <a title="Now is page {{ quotes.number }} of {{ quotes.paginator.num_pages }}"
-                        class="{% if not quotes.has_next %} disabled {% endif %}" href="{% if quotes.has_next %}  
-                    {% url 'quotes:tag_paginate' tag_query quotes.next_page_number %}  {% else %} # {% endif %}">
-                        Next <span aria-hidden="true">→</span></a>
+                <li class="page-indicator">Page {{ quotes.number }} of {{ quotes.paginator.num_pages }}</li>
+                <li>
+                    {% if quotes.has_next %}
+                    <a href="{% url 'quotes:tag_paginate' tag_query quotes.next_page_number %}">Next →</a>
+                    {% else %}<span class="disabled">Next →</span>{% endif %}
                 </li>
             </ul>
         </nav>
-    </div>
+        {% endif %}
+    </section>
 </div>
 {% endblock %}

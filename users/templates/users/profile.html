@@ -1,36 +1,23 @@
 {% extends "quotes/base.html" %}
 
 {% block content %}
-
-<div class="rounded-3 bg-light w-50 m-auto">
-    <div>
-        <h1>Profile page: {{user.username}}</h1>
-        <img src="{{ user.profile.avatar.url }}" alt="avatar of user" />
+<section class="form-card">
+    <div class="profile-heading">
+        <img class="profile-avatar" src="{{ user.profile.avatar.url }}" alt="{{ user.username }}'s profile photo" />
+        <p class="eyebrow">Your account</p>
+        <h1>Profile settings</h1>
     </div>
-
-    {% if messages %}
-    <div>
-        {% for message in messages %}
-        <div {% if message.tags %} class="alert alert-{{ message.tags }}" {% endif %}>{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
     <form method="post" enctype="multipart/form-data" class="form">
         {% csrf_token %}
-        <div class="form-row">
-            <div class="col-md-5">
-                <div class="form-group">
-                    <label class="small mb-1">Change Avatar:</label>
-                    {{ profile_form.avatar }}
-                    <span>{{ profile_form.errors.avatar }}</span>
-                </div>
-            </div>
+        <div class="mb-3">
+            <label class="form-label" for="{{ profile_form.avatar.id_for_label }}">Change profile photo</label>
+            {{ profile_form.avatar }}
+            {% for error in profile_form.avatar.errors %}<p class="field-errors mb-0">{{ error }}</p>{% endfor %}
         </div>
-        <div class="grid text-center p-3">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <button type="reset" class="btn btn-secondary">Reset</button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a class="btn btn-outline-primary" href="{% url 'quotes:main' %}">Cancel</a>
         </div>
     </form>
-
-    {% endblock content %}
+</section>
+{% endblock content %}

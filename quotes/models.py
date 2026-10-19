@@ -42,7 +42,10 @@ class Quote(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-created_at', '-id']
+        indexes = [
+            models.Index(fields=['-created_at', '-id'], name='quote_created_id_idx'),
+        ]
         verbose_name = 'Quote'
         verbose_name_plural = 'Quotes'
 

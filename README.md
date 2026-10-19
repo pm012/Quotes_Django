@@ -77,9 +77,13 @@ MONGO_DOMAIN=cluster_domain.mongodb.net
 # Email Settings (for Password Reset)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=465
+EMAIL_USE_SSL=True
+EMAIL_USE_TLS=False
 EMAIL_HOST_USER=your_email@gmail.com
 EMAIL_HOST_PASSWORD=your_app_password
 ```
+
+For local development, `DEBUG=True` is convenient. Before deploying, set `DEBUG=False`, use a newly generated `SECRET_KEY`, and configure `ALLOWED_HOSTS` for the deployed domain. Session and CSRF cookies are marked secure automatically when `DEBUG=False`.
 
 
 ### 3. Database Setup & Migrations

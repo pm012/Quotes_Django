@@ -122,12 +122,20 @@ class TestQuotesViews:
         user, author, tag, _ = setup_data
         client.login(username='testuser', password='password123')
 
+        form_response = client.get(reverse('quotes:add_quote'))
+        assert form_response.status_code == 200
+        assert f'value="{author.id}"'.encode() in form_response.content
+        assert f'value="{tag.id}"'.encode() in form_response.content
+
         response = client.post(reverse('quotes:add_quote'), {
             'quote': 'Imagination is everything.',
             'author': author.id,
             'tags': [tag.id]
         })
-        assert response.status_code in (200, 302)
+        assert response.status_code == 302
+        quote = Quote.objects.get(quote='Imagination is everything.')
+        assert quote.author == author
+        assert list(quote.tags.all()) == [tag]
 
     def test_add_author_invalid_post(self, client, setup_data):
         user, _, _, _ = setup_data

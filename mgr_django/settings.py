@@ -7,7 +7,7 @@ env = environ.Env()
 environ.Env.read_env(BASE_DIR / '.env')
 
 SECRET_KEY = env('SECRET_KEY')
-DEBUG = env.bool('DEBUG', default=True)
+DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 # Application definition
@@ -70,6 +70,12 @@ DATABASES = {
     }
 }
 
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -95,15 +101,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
-        "HOST": env('EMAIL_HOST', default='smtp.gmail.com'),
-        "PORT": env.int('EMAIL_PORT', default=465),
-        "USE_SSL": env.bool('EMAIL_USE_SSL', default=True),
-        "USE_TLS": env.bool('EMAIL_USE_TLS', default=False),
-        "USERNAME": env('EMAIL_HOST_USER', default=''),
-        "PASSWORD": env('EMAIL_HOST_PASSWORD', default=''),
-    }
+    'default': {
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+        'OPTIONS': {
+            'host': env('EMAIL_HOST', default='smtp.gmail.com'),
+            'port': env.int('EMAIL_PORT', default=465),
+            'use_ssl': env.bool('EMAIL_USE_SSL', default=True),
+            'use_tls': env.bool('EMAIL_USE_TLS', default=False),
+            'username': env('EMAIL_HOST_USER', default=''),
+            'password': env('EMAIL_HOST_PASSWORD', default=''),
+        },
+    },
 }
 
 # Auth redirects
