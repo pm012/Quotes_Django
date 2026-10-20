@@ -1,13 +1,24 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetView
 from django.db import transaction
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 
-from .forms import RegisterForm, LoginForm, ProfileForm, UserNameForm
+from .forms import (
+    LoginForm,
+    ProfileForm,
+    RegisterForm,
+    UserAdministrationForm,
+    UserNameForm,
+)
+
+
+def staff_required(view_func):
+    return user_passes_test(lambda user: user.is_staff)(view_func)
 
 
 @login_required
@@ -84,3 +95,44 @@ class ResetPasswordView(PasswordResetView):
     html_email_template_name = 'users/password_reset_email.html'
     success_url = reverse_lazy('users:password_reset_done')
     subject_template_name = 'users/password_reset_subject.txt'
+
+
+@staff_required
+def user_administration(request):
+    users = User.objects.order_by('username')
+    return render(request, 'users/user_administration.html', {'users': users})
+
+
+@staff_required
+def edit_user(request, user_id):
+    target_user = get_object_or_404(User, pk=user_id)
+    if target_user == request.user:
+        messages.error(request, "You cannot edit your own account here.")
+        return redirect('users:user_administration')
+
+    if request.method == 'POST':
+        form = UserAdministrationForm(request.POST, instance=target_user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Account '{target_user.username}' was updated.")
+            return redirect('users:user_administration')
+    else:
+        form = UserAdministrationForm(instance=target_user)
+
+    return render(request, 'users/edit_user.html', {
+        'form': form,
+        'target_user': target_user,
+    })
+
+
+@staff_required
+@require_POST
+def delete_user(request, user_id):
+    target_user = get_object_or_404(User, pk=user_id)
+    if target_user == request.user:
+        messages.error(request, "You cannot delete your own account.")
+    else:
+        username = target_user.username
+        target_user.delete()
+        messages.success(request, f"Account '{username}' was deleted.")
+    return redirect('users:user_administration')

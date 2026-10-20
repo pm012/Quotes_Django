@@ -8,7 +8,18 @@
         {% for field in form %}
         <div class="mb-3">
             <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {% if field.name == "tags" %}
+            <details class="tag-picker">
+                <summary data-tag-summary>Choose tags</summary>
+                <div class="tag-picker-options">
+                    <input class="form-control" type="search" placeholder="Search tags"
+                        aria-label="Search tags" data-tag-search autocomplete="off">
+                    {{ field }}
+                </div>
+            </details>
+            {% else %}
             {{ field }}
+            {% endif %}
             {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
             {% for error in field.errors %}<p class="field-errors mb-0">{{ error }}</p>{% endfor %}
         </div>

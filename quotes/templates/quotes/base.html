@@ -23,6 +23,9 @@
                 <a class="nav-link" href="{% url 'quotes:add_quote' %}">Add a quote</a>
                 <a class="nav-link" href="{% url 'quotes:add_author' %}">Add an author</a>
                 <a class="nav-link" href="{% url 'quotes:add_tag' %}">Add a tag</a>
+                {% if user.is_staff %}
+                <a class="nav-link" href="{% url 'users:user_administration' %}">Manage users</a>
+                {% endif %}
                 {% endif %}
             </div>
             <div class="account-links">
@@ -49,6 +52,7 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
+    <script src="{% static 'quotes/form_controls.js' %}" defer></script>
 </body>
 
 </html>

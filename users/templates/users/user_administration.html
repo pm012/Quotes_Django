@@ -1,0 +1,47 @@
+{% extends "quotes/base.html" %}
+{% block content %}
+<section class="form-card admin-users-card">
+    <p class="eyebrow">Administrator tools</p>
+    <h1>Users Administration</h1>
+    <p class="muted">View accounts, update user details and roles, or remove accounts. Your own account cannot be changed or deleted here.</p>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for managed_user in users %}
+                <tr>
+                    <td>{{ managed_user.username }}{% if managed_user == user %} <span class="muted">(you)</span>{% endif %}</td>
+                    <td>{{ managed_user.email|default:"—" }}</td>
+                    <td>{% if managed_user.is_staff %}Administrator{% else %}User{% endif %}</td>
+                    <td>{% if managed_user.is_active %}Active{% else %}Inactive{% endif %}</td>
+                    <td>
+                        {% if managed_user != user %}
+                        <div class="admin-user-actions">
+                            <a class="btn btn-outline-primary btn-sm" href="{% url 'users:edit_user' managed_user.pk %}">View / edit</a>
+                            <form method="post" action="{% url 'users:delete_user' managed_user.pk %}"
+                                onsubmit="return confirm('Delete {{ managed_user.username|escapejs }}?');">
+                                {% csrf_token %}
+                                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <span class="muted">Current account</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">No user accounts found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

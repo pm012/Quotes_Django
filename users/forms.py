@@ -55,3 +55,19 @@ class UserNameForm(forms.ModelForm):
                 "autocomplete": "family-name",
             }),
         }
+
+
+class UserAdministrationForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username", "email", "first_name", "last_name", "is_active", "is_staff"]
+        labels = {
+            "is_active": "Account active",
+            "is_staff": "Administrator access",
+        }
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+        }

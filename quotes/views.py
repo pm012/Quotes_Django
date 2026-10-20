@@ -8,7 +8,7 @@ from django.db.models import Count
 from django.urls import reverse_lazy
 
 from .models import Quote, Author, Tag
-from .forms import AuthorForm, QuoteForm, TagForm
+from .forms import AuthorForm, QuoteFilterForm, QuoteForm, TagForm
 
 PER_PAGE = 10
 
@@ -17,6 +17,23 @@ def main(request, page=1):
     quotes_list = Quote.objects.select_related(
         'author', 'created_by'
     ).prefetch_related('tags')
+    filter_form = QuoteFilterForm(
+        request.GET or None,
+        current_user=request.user if request.user.is_authenticated else None,
+    )
+    if filter_form.is_valid():
+        filter_type = filter_form.cleaned_data['filter_type']
+        item = filter_form.cleaned_data['item']
+        if filter_type and item:
+            filter_fields = {
+                'user': {'created_by_id': item},
+                'author': {'author_id': item},
+                'tag': {'tags__id': item},
+            }
+            quotes_list = quotes_list.filter(
+                **filter_fields[filter_type]
+            ).distinct()
+
     paginator = Paginator(quotes_list, per_page=PER_PAGE)
     quotes_page = paginator.get_page(page)
 
@@ -25,6 +42,8 @@ def main(request, page=1):
     context = {
         "quotes": quotes_page,
         "top_tags": top_tags,
+        "filter_form": filter_form,
+        "filter_options": filter_form.filter_options,
     }
     return render(request, "quotes/index.html", context)
 

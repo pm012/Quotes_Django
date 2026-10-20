@@ -100,6 +100,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+_email_host_user = env('EMAIL_HOST_USER', default='')
+_email_host_password = env('EMAIL_HOST_PASSWORD', default='')
+
+DEFAULT_FROM_EMAIL = env(
+    'DEFAULT_FROM_EMAIL',
+    default=_email_host_user or 'webmaster@localhost',
+)
+
 MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
@@ -108,8 +116,8 @@ MAILERS = {
             'port': env.int('EMAIL_PORT', default=465),
             'use_ssl': env.bool('EMAIL_USE_SSL', default=True),
             'use_tls': env.bool('EMAIL_USE_TLS', default=False),
-            'username': env('EMAIL_HOST_USER', default=''),
-            'password': env('EMAIL_HOST_PASSWORD', default=''),
+            'username': _email_host_user,
+            'password': _email_host_password,
         },
     },
 }

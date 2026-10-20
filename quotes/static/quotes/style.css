@@ -425,6 +425,58 @@ textarea.form-control,
     min-height: 9rem;
 }
 
+.quote-filter {
+    max-width: none;
+    margin: 0 0 1.25rem;
+    padding: 1.15rem;
+}
+
+.admin-users-card {
+    max-width: none;
+}
+
+.admin-user-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.admin-user-actions form {
+    margin: 0;
+}
+
+.tag-picker {
+    border: 1px solid #b5cec7;
+    border-radius: 0.6rem;
+    background: #fff;
+}
+
+.tag-picker summary {
+    cursor: pointer;
+    padding: 0.65rem 0.85rem;
+    font-weight: 600;
+}
+
+.tag-picker-options {
+    display: grid;
+    gap: 0.75rem;
+    border-top: 1px solid var(--line);
+    padding: 0.8rem;
+}
+
+.tag-picker .tags-checkboxes {
+    max-height: 15rem;
+    overflow-y: auto;
+}
+
+.tag-picker .tags-checkboxes [hidden] {
+    display: none;
+}
+
+.tag-picker .tags-checkboxes label {
+    margin: 0;
+}
+
 .form-actions {
     display: flex;
     flex-wrap: wrap;

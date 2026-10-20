@@ -1,5 +1,51 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from .models import Author, Quote, Tag
+
+
+class QuoteFilterForm(forms.Form):
+    filter_type = forms.ChoiceField(
+        choices=[
+            ("", "Filter quotes by..."),
+            ("user", "User"),
+            ("author", "Author"),
+            ("tag", "Tag"),
+        ],
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select", "data-filter-type": ""}),
+    )
+    item = forms.ChoiceField(
+        choices=[("", "Choose an item")],
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select", "data-filter-item": "", "disabled": True}),
+    )
+
+    def __init__(self, *args, current_user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        selected_type = self.data.get("filter_type") or self.initial.get("filter_type", "")
+        user_model = get_user_model()
+        self.filter_options = {
+            "user": [
+                [
+                    str(user.pk),
+                    "me" if current_user and user.pk == current_user.pk else user.get_username(),
+                ]
+                for user in user_model.objects.order_by("username")
+            ],
+            "author": [
+                [str(author.pk), author.fullname]
+                for author in Author.objects.order_by("fullname")
+            ],
+            "tag": [
+                [str(tag.pk), tag.name]
+                for tag in Tag.objects.order_by("name")
+            ],
+        }
+        if selected_type in self.filter_options:
+            self.fields["item"].choices = [
+                ("", "Choose an item"),
+                *self.filter_options[selected_type],
+            ]
 
 
 class AuthorForm(forms.ModelForm):

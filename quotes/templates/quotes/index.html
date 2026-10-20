@@ -7,6 +7,30 @@
 </div>
 <div class="row g-4">
     <section class="col-lg-8" aria-label="Quotes">
+        <form method="get" class="quote-filter form-card" aria-label="Filter quotes">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ filter_form.filter_type.id_for_label }}">Filter by</label>
+                    {{ filter_form.filter_type }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ filter_form.item.id_for_label }}">Choose an item</label>
+                    {{ filter_form.item }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="filter-item-search">Search items</label>
+                    <input id="filter-item-search" class="form-control" type="search"
+                        placeholder="Type to filter options" autocomplete="off" disabled>
+                </div>
+            </div>
+            {% for error in filter_form.filter_type.errors %}<p class="field-errors mb-0">{{ error }}</p>{% endfor %}
+            {% for error in filter_form.item.errors %}<p class="field-errors mb-0">{{ error }}</p>{% endfor %}
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Apply filter</button>
+                <a class="btn btn-outline-primary" href="{% url 'quotes:main' %}">Clear</a>
+            </div>
+        </form>
+        {{ filter_options|json_script:"quote-filter-options" }}
         {% for quote in quotes %}
         <article class="quote" itemscope itemtype="https://schema.org/CreativeWork">
             <span class="text" itemprop="text">{{ quote.quote }}</span>
@@ -46,7 +70,7 @@
             <ul class="pager">
                 <li>
                     {% if quotes.has_previous %}
-                    <a href="{% url 'quotes:main_paginate' quotes.previous_page_number %}">← Previous</a>
+                    <a href="{% url 'quotes:main_paginate' quotes.previous_page_number %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">← Previous</a>
                     {% else %}
                     <span class="disabled">← Previous</span>
                     {% endif %}
@@ -54,7 +78,7 @@
                 <li class="page-indicator">Page {{ quotes.number }} of {{ quotes.paginator.num_pages }}</li>
                 <li>
                     {% if quotes.has_next %}
-                    <a href="{% url 'quotes:main_paginate' quotes.next_page_number %}">Next →</a>
+                    <a href="{% url 'quotes:main_paginate' quotes.next_page_number %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">Next →</a>
                     {% else %}
                     <span class="disabled">Next →</span>
                     {% endif %}

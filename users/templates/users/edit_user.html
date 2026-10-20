@@ -1,0 +1,29 @@
+{% extends "quotes/base.html" %}
+{% block content %}
+<section class="form-card">
+    <p class="eyebrow">Administrator tools</p>
+    <h1>View / edit {{ target_user.username }}</h1>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+            {% if field.field.widget.input_type == "checkbox" %}
+            <div class="form-check">
+                {{ field }}
+                <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+            {% else %}
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% endif %}
+            {% for error in field.errors %}<p class="field-errors mb-0">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        {% for error in form.non_field_errors %}<p class="field-errors">{{ error }}</p>{% endfor %}
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Save changes</button>
+            <a class="btn btn-outline-primary" href="{% url 'users:user_administration' %}">Back to users</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

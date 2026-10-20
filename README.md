@@ -6,8 +6,9 @@ A full-featured Web Application built with Django that allows users to explore, 
 
 ## Features
 
-- **Quote Management**: Browse quotes with pagination, view detailed author profiles, and filter quotes by tags.
-- **Quote Contributions**: Signed-in users can create quotes, select multiple tags with checkboxes, and edit or delete their own contributions. Staff administrators can manage all quotes; legacy quotes without an owner remain admin-managed.
+- **Quote Management**: Browse quotes with pagination, view detailed author profiles, and filter by user, author, or tag using searchable selectors.
+- **Quote Contributions**: Signed-in users can create quotes, choose multiple tags from a searchable checkbox dropdown, and edit or delete their own contributions. Staff administrators can manage all quotes; legacy quotes without an owner remain admin-managed.
+- **User Administration**: Staff administrators can view, edit roles, and delete other accounts; their own account is protected from these actions.
 - **User Authentication**: Complete user lifecycle including Sign Up, Login, Logout (via POST request for security), and Profile management.
 - **Profile Settings**: Update your first and last name and preview an avatar before saving it.
 - **Password Reset**: Email-based password recovery via SMTP integration.
@@ -83,9 +84,11 @@ EMAIL_USE_SSL=True
 EMAIL_USE_TLS=False
 EMAIL_HOST_USER=your_email@gmail.com
 EMAIL_HOST_PASSWORD=your_app_password
+DEFAULT_FROM_EMAIL=your_email@gmail.com
 ```
 
 For local development, `DEBUG=True` is convenient. Before deploying, set `DEBUG=False`, use a newly generated `SECRET_KEY`, and configure `ALLOWED_HOSTS` for the deployed domain. Session and CSRF cookies are marked secure automatically when `DEBUG=False`.
+`DEFAULT_FROM_EMAIL` should be an address accepted by the SMTP provider. It defaults to `EMAIL_HOST_USER` so Django does not attempt to send reset emails from `webmaster@localhost`.
 
 
 ### 3. Database Setup & Migrations

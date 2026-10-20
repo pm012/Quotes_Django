@@ -80,6 +80,46 @@ class TestQuotesViews:
         response = client.get(url)
         assert response.status_code == 200
 
+    def test_main_view_filters_quotes_by_user_author_and_tag(self, client, setup_data):
+        user, author, tag, owned_quote = setup_data
+        owned_quote.created_by = user
+        owned_quote.save(update_fields=['created_by'])
+        other_author = Author.objects.create(fullname='Another Author')
+        other_tag = Tag.objects.create(name='other')
+        other_quote = Quote.objects.create(
+            quote='A different quote',
+            author=other_author,
+            created_by=User.objects.create_user(username='other-filter-user'),
+        )
+        other_quote.tags.add(other_tag)
+
+        client.force_login(user)
+        for filter_type, item_id, expected, excluded in [
+            ('user', user.pk, 'Look up at the stars', 'A different quote'),
+            ('author', other_author.pk, 'A different quote', 'Look up at the stars'),
+            ('tag', other_tag.pk, 'A different quote', 'Look up at the stars'),
+        ]:
+            response = client.get(reverse('quotes:main'), {
+                'filter_type': filter_type,
+                'item': item_id,
+            })
+            assert response.status_code == 200
+            assert expected.encode() in response.content
+            assert excluded.encode() not in response.content
+
+        user_filter = client.get(reverse('quotes:main'), {'filter_type': 'user'})
+        assert b'>me</option>' in user_filter.content
+
+    def test_quote_edit_form_has_searchable_tag_multiselect(self, client, setup_data):
+        user, _, _, _ = setup_data
+        client.force_login(user)
+
+        response = client.get(reverse('quotes:add_quote'))
+
+        assert response.status_code == 200
+        assert b'data-tag-search' in response.content
+        assert b'type="checkbox"' in response.content
+
     def test_author_detail_view(self, client, setup_data):
         _, author, _, _ = setup_data
         

@@ -86,7 +86,7 @@ class TestUsersViews:
         'default': {
             'BACKEND': 'django.core.mail.backends.locmem.EmailBackend',
         },
-    })
+    }, DEFAULT_FROM_EMAIL='reset@example.com')
     def test_password_reset_does_not_reveal_unknown_email(self, client):
         User.objects.create_user(
             username='reset-user',
@@ -108,6 +108,49 @@ class TestUsersViews:
         assert unknown_response.status_code == known_response.status_code == 200
         assert unknown_response.content == known_response.content
         assert len(mail.outbox) == 1
+        assert mail.outbox[0].from_email == 'reset@example.com'
+
+    @pytest.mark.django_db
+    def test_user_administration_permissions_and_self_protection(self, client):
+        admin = User.objects.create_user(
+            username='site-admin',
+            password='admin-password-123',
+            is_staff=True,
+        )
+        other_user = User.objects.create_user(
+            username='managed-user',
+            password='user-password-123',
+        )
+
+        page_url = reverse('users:user_administration')
+        edit_url = reverse('users:edit_user', args=[other_user.pk])
+        delete_url = reverse('users:delete_user', args=[other_user.pk])
+        assert client.get(page_url).status_code == 302
+
+        client.force_login(admin)
+        page = client.get(page_url)
+        assert page.status_code == 200
+        assert b'Current account' in page.content
+        assert client.get(reverse('users:edit_user', args=[admin.pk])).status_code == 302
+
+        response = client.post(edit_url, {
+            'username': 'managed-user',
+            'email': '',
+            'first_name': 'Managed',
+            'last_name': 'Person',
+            'is_active': 'on',
+            'is_staff': 'on',
+        })
+        assert response.status_code == 302
+        other_user.refresh_from_db()
+        assert other_user.first_name == 'Managed'
+        assert other_user.is_staff
+
+        assert client.post(reverse('users:delete_user', args=[admin.pk])).status_code == 302
+        admin.refresh_from_db()
+        assert User.objects.filter(pk=admin.pk).exists()
+        assert client.post(delete_url).status_code == 302
+        assert not User.objects.filter(pk=other_user.pk).exists()
 
     def test_profile_model_methods(self, db):
         user = User.objects.create_user(username='avataruser', password='password123')

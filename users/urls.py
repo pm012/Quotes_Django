@@ -13,6 +13,9 @@ urlpatterns = [
     path('login/', views.loginuser, name='login'),
     path('logout/', views.logoutuser, name='logout'),
     path('profile/', views.profile, name='profile'),
+    path('administration/', views.user_administration, name='user_administration'),
+    path('administration/<int:user_id>/edit/', views.edit_user, name='edit_user'),
+    path('administration/<int:user_id>/delete/', views.delete_user, name='delete_user'),
     
     # Password Reset flow
     path('reset-password/', views.ResetPasswordView.as_view(), name='password_reset'),
